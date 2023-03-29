@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conway's Game of Life</title>
+    <link rel="stylesheet" href="./css/style.css">
+</head>
+
+<body>
+    <div class="container">
+        <div class="row">
+            <label for="rows">Rows</label>
+            <input type="number" name="rows" id="rows" min="5">
+            <label for="columns">Columns</label>
+            <input type="number" name="columns" id="columns" min="5">
+            <label for="size">Cell Size</label>
+            <input type="number" name="size" id="size" min="5" max="50">
+        </div>
+        <div class="row">
+            <label for="prob">Probability of Life At Start %</label>
+            <input type="number" name="prob" id="prob" min="10" max="99">
+            <label for="prob">Genereation Step Time (ms)</label>
+            <input type="number" name="interval" id="interval" min="50" step="50">
+        </div>
+        <div class="row">
+            <button id="start">Start</button>
+            <button id="stop">Stop</button>
+            <button id="reset">Reset</button>
+        </div>
+    </div>
+    <p id="gen"></p>
+    <div class="container">
+        <canvas id="gol"></canvas>
+    </div>
+    <script type="module" src="./js/gameoflife.js"></script>
+    <script type="module" src="./js/app.js"></script>
+</body>
+
+</html>
