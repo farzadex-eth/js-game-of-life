@@ -1,7 +1,19 @@
+// Canvas element
 let canvas = document.getElementById("gol");
 
+/**
+ * Class for the game board
+ */
 class Board {
 
+    /**
+     * Board Constructor
+     * @param {number} w - board width = number of columns
+     * @param {number} h - board height = number of rows
+     * @param {number} cellSize - single cell size (square)
+     * @param {number} probability - probability of a cell being alive in Gen. 0
+     * @param {number} interv - time interval between generations
+     */
     constructor(w, h, cellSize, probability, interv) {
         this.size = cellSize;
         this.cells = Array(w * h);
@@ -16,6 +28,10 @@ class Board {
         this.gen = 0;
     }
 
+    /**
+     * Set new width
+     * @param {number} val - number of columns
+     */
     setW(val) {
         this.clear();
         this.width = val;
@@ -25,6 +41,10 @@ class Board {
         this.draw();
     }
 
+    /**
+     * Set new height
+     * @param {number} val - number of rows
+     */
     setH(val) {
         this.clear();
         this.height = val;
@@ -34,6 +54,10 @@ class Board {
         this.draw();
     }
 
+    /**
+     * Set new cell size
+     * @param {number} val - cell size
+     */
     setSize(val) {
         this.clear();
         this.size = val;
@@ -42,6 +66,10 @@ class Board {
         this.draw();
     }
 
+    /**
+     * Set new probability of life
+     * @param {number} val - probability
+     */
     setP(val) {
         this.clear();
         this.prob = val;
@@ -49,6 +77,10 @@ class Board {
         this.draw();
     }
 
+    /**
+     * Set new time interval
+     * @param {number} val - time interval
+     */
     setI(val) {
         this.interv = val;
         if(this.interval) {
@@ -57,16 +89,25 @@ class Board {
         }
     }
 
+    /**
+     * Generate random array of dead or alive cells based on the probability
+     */
     initCells() {
         for (let i = 0; i < this.width * this.height; i++) {
             this.cells[i] = Math.floor(Math.random() * 100) >= (100-this.prob) ? 1 : 0;
         }
     }
 
+    /**
+     * Clear the board
+     */
     clear() {
         this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
     }
 
+    /**
+     * Draw cells from the array
+     */
     draw() {
         for (let i = 0; i < this.width * this.height; i++) {
             if (this.cells[i] === 1) {
@@ -82,38 +123,71 @@ class Board {
         this.showGen();
     }
 
+    /**
+     * Update generation counter on the page
+     */
     showGen() {
         document.getElementById("gen").innerHTML = `Generation ${this.gen}`;
     }
 
+    /**
+     * Returns if a cell is alive or dead
+     * @param {number} i - cell index in cells array
+     * @returns {number}
+     */
     cellState(i) {
         return this.cells[i];
     }
 
+    /**
+     * Returns cell index in cells array that's left of the ith cell
+     * @param {number} i - cell index in cells array
+     * @returns {number}
+     */
     leftOf(i) {
         return (
             Math.floor(i / this.width) * this.width + (((i - 1) % this.width) + this.width) % this.width
         );
     }
 
+    /**
+     * Returns cell index in cells array that's right of the ith cell
+     * @param {number} i - cell index in cells array
+     * @returns {number}
+     */
     rightOf(i) {
         return (
             Math.floor(i / this.width) * this.width + (((i + 1) % this.width) + this.width) % this.width
         );
     }
 
+    /**
+     * Returns cell index in cells array that's top of the ith cell
+     * @param {number} i - cell index in cells array
+     * @returns {number}
+     */
     topOf(i) {
         return (
             (i - this.width + this.width * this.height) % (this.width * this.height)
         );
     }
 
+    /**
+     * Returns cell index in cells array that's bottom of the ith cell
+     * @param {number} i - cell index in cells array
+     * @returns {number}
+     */
     bottomOf(i) {
         return (
             (i + this.width + this.width * this.height) % (this.width * this.height)
         );
     }
 
+    /**
+     * Returns number of alive neighbours for ith cell
+     * @param {number} i - cell index in cells array
+     * @returns {number}
+     */
     countNeighbours(i) {
         return (
             this.cellState(this.leftOf(i)) +
@@ -127,6 +201,13 @@ class Board {
         );
     }
 
+    /**
+     * Calculate next generation based on Conway's Game of Life Rules and set the cells array
+     * 1. Any live cell with fewer than two live neighbours dies, as if by underpopulation.
+     * 2. Any live cell with two or three live neighbours lives on to the next generation.
+     * 3. Any live cell with more than three live neighbours dies, as if by overpopulation.
+     * 4. Any dead cell with exactly three live neighbours becomes a live cell, as if by reproduction.
+     */
     nextGeneration() {
         let nextCells = [...this.cells];
         for (let i = 0; i < this.width * this.height; i++) {
@@ -145,6 +226,9 @@ class Board {
         this.gen++;
     }
 
+    /**
+     * Run the game
+     */
     run() {
         this.interval = setInterval(() => {
             this.nextGeneration();
@@ -153,10 +237,16 @@ class Board {
         }, this.interv);
     }
 
+    /**
+     * Stop the game
+     */
     stop() {
         clearInterval(this.interval);
     }
 
+    /**
+     * Stop & Reset the board
+     */
     reset() {
         this.stop();
         this.gen = 0;
