@@ -17,7 +17,7 @@ class Board {
      */
     constructor(w, h, cellSize, probability, interv) {
         this.size = cellSize;
-        this.cells = Array(w * h);
+        this.cells = Array(w * h).fill(0);
         this.width = w;
         this.height = h;
         this.ctx = canvas.getContext("2d");
@@ -25,7 +25,7 @@ class Board {
         this.ctx.canvas.height = h * cellSize;
         this.prob = probability;
         this.interv = interv;
-        this.initCells();
+        // this.initCells();
         this.gen = 0;
     }
 
@@ -36,8 +36,7 @@ class Board {
     setW(val) {
         this.clear();
         this.width = val;
-        this.cells = Array(this.width * this.height);
-        this.initCells();
+        this.cells = Array(this.width * this.height).fill(0);
         this.ctx.canvas.width = val * this.size;
         this.draw();
     }
@@ -49,8 +48,7 @@ class Board {
     setH(val) {
         this.clear();
         this.height = val;
-        this.cells = Array(this.width * this.height);
-        this.initCells();
+        this.cells = Array(this.width * this.height).fill(0);
         this.ctx.canvas.height = val * this.size;
         this.draw();
     }
@@ -74,7 +72,6 @@ class Board {
     setP(val) {
         this.clear();
         this.prob = val;
-        this.initCells();
         this.draw();
     }
 
@@ -93,7 +90,7 @@ class Board {
     /**
      * Generate random array of dead or alive cells based on the probability
      */
-    initCells() {
+    randomCells() {
         for (let i = 0; i < this.width * this.height; i++) {
             this.cells[i] = Math.floor(Math.random() * 100) >= (100 - this.prob) ? 1 : 0;
         }
@@ -249,11 +246,12 @@ class Board {
         this.changed = [];
         for (let i = 0; i < this.width * this.height; i++) {
             const n = this.countNeighbours(i);
+
             if (n < 2 && this.cellState(i) === 1) {
-                    this.changed.push({ index: i, status: 0 });
+                this.changed.push({ index: i, status: 0 });
             } else if (n > 3 && this.cellState(i) === 1) {
                 this.changed.push({ index: i, status: 0 });
-            } else if (n === 4 && this.cellState(i) === 0) {
+            } else if (n === 3 && this.cellState(i) === 0) {
                 this.changed.push({ index: i, status: 1 });
             }
         }
@@ -276,6 +274,7 @@ class Board {
      */
     stop() {
         clearInterval(this.interval);
+        this.interval = null;
     }
 
     /**
@@ -284,9 +283,32 @@ class Board {
     reset() {
         this.stop();
         this.gen = 0;
-        this.initCells();
+        this.cells = Array(this.width * this.height).fill(0);
         this.clear();
         this.draw();
+    }
+
+    /**
+     * Stop & Reset the board with random alive/dead cells
+     */
+    random() {
+        this.stop();
+        this.gen = 0;
+        this.randomCells();
+        this.clear();
+        this.draw();
+    }
+
+    /**
+     * Change cell state by mouse click
+     * @param {number} x - XOfsset of click event
+     * @param {number} y - YOffset of click event
+     */
+    handleCellClick(x, y) {
+        const i = (Math.floor(y/this.size) * this.width + Math.floor(x/this.size));
+        this.cells[i] = (this.cells[i] === 1) ? 0 : 1;
+        this.clearCell(i);
+        this.drawCell(i, this.cells[i]);
     }
 }
 

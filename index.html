@@ -22,15 +22,17 @@
         <div class="row">
             <label for="prob">Probability of Life At Start %</label>
             <input type="number" name="prob" id="prob" min="10" max="99">
-            <label for="prob">Genereation Step Time (ms)</label>
-            <input type="number" name="interval" id="interval" min="50" step="50">
+            <button id="random">Random Initialization</button>
         </div>
         <div class="row">
+            <label for="prob">Genereation Step Time (ms)</label>
+            <input type="number" name="interval" id="interval" min="50" step="50">
             <button id="start">Start</button>
             <button id="stop">Stop</button>
             <button id="reset">Reset</button>
         </div>
     </div>
+    <p style="width:100%; margin: 2rem auto; text-align: center; text-transform: uppercase;">*Click on each cell to change their state or use random initialization*</p>
     <p id="gen"></p>
     <div class="container">
         <canvas id="gol"></canvas>

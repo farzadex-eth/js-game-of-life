@@ -60,3 +60,11 @@ document.getElementById("stop").addEventListener("click", (e) => {
 document.getElementById("reset").addEventListener("click", (e) => {
     board.reset();
 })
+
+document.getElementById("random").addEventListener("click", (e) => {
+    board.random();
+})
+
+document.getElementById("gol").addEventListener("click", (e) => {
+    board.handleCellClick(e.offsetX, e.offsetY);
+})
