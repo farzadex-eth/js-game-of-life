@@ -6,6 +6,7 @@ let canvas = document.getElementById("gol");
  */
 class Board {
 
+    changed = [];
     /**
      * Board Constructor
      * @param {number} w - board width = number of columns
@@ -83,7 +84,7 @@ class Board {
      */
     setI(val) {
         this.interv = val;
-        if(this.interval) {
+        if (this.interval) {
             this.stop();
             this.run();
         }
@@ -94,7 +95,7 @@ class Board {
      */
     initCells() {
         for (let i = 0; i < this.width * this.height; i++) {
-            this.cells[i] = Math.floor(Math.random() * 100) >= (100-this.prob) ? 1 : 0;
+            this.cells[i] = Math.floor(Math.random() * 100) >= (100 - this.prob) ? 1 : 0;
         }
     }
 
@@ -106,21 +107,57 @@ class Board {
     }
 
     /**
-     * Draw cells from the array
+     * Draw a single cell
+     * @param {number} i - cell index 
+     * @param {number} status - cell value
+     * @returns 
+     */
+    drawCell(i, status) {
+        if (status === 1) {
+            this.ctx.fillRect((i % this.width) * this.size, Math.floor(i / this.width) * this.size, this.size, this.size);
+            return;
+        }
+        this.ctx.beginPath();
+        this.ctx.lineWidth = "0.5";
+        this.ctx.strokeStyle = "black";
+        this.ctx.rect((i % this.width) * this.size, Math.floor(i / this.width) * this.size, this.size, this.size);
+        this.ctx.stroke();
+    }
+
+    /**
+     * Clear a single cell
+     * @param {number} i - cell index 
+     */
+    clearCell(i) {
+        this.ctx.clearRect((i % this.width) * this.size, Math.floor(i / this.width) * this.size, this.size, this.size);
+    }
+
+    /**
+     * Draw whole board
      */
     draw() {
         for (let i = 0; i < this.width * this.height; i++) {
-            if (this.cells[i] === 1) {
-                this.ctx.fillRect((i % this.width) * this.size, Math.floor(i / this.width) * this.size, this.size, this.size);
-                continue;
-            }
-            this.ctx.beginPath();
-            this.ctx.lineWidth = "0.5";
-            this.ctx.strokeStyle = "black";
-            this.ctx.rect((i % this.width) * this.size, Math.floor(i / this.width) * this.size, this.size, this.size);
-            this.ctx.stroke();
+            this.drawCell(i, this.cells[i]);
         }
         this.showGen();
+    }
+
+    /**
+     * Clear and draw a singlechanged cell
+     */
+    clearDrawChanged(cell) {
+        this.clearCell(cell.index);
+        this.drawCell(cell.index, cell.status);
+    }
+
+    /**
+     * Update cells array and cells on board
+     */
+    updateBoard() {
+        this.changed.forEach((cell) => {
+            this.cells[cell.index] = cell.status;
+            this.clearDrawChanged(cell);
+        })
     }
 
     /**
@@ -202,27 +239,24 @@ class Board {
     }
 
     /**
-     * Calculate next generation based on Conway's Game of Life Rules and set the cells array
-     * 1. Any live cell with fewer than two live neighbours dies, as if by underpopulation.
-     * 2. Any live cell with two or three live neighbours lives on to the next generation.
-     * 3. Any live cell with more than three live neighbours dies, as if by overpopulation.
-     * 4. Any dead cell with exactly three live neighbours becomes a live cell, as if by reproduction.
+     * Calculate next generation based on Conway's Game of Life Rules and record the changed cells
+     * 1. Any live cell with fewer than two live neighbours dies, as if by underpopulation. -> Change
+     * 2. Any live cell with two or three live neighbours lives on to the next generation. -> No Change
+     * 3. Any live cell with more than three live neighbours dies, as if by overpopulation. -> Change
+     * 4. Any dead cell with exactly three live neighbours becomes a live cell, as if by reproduction. -> Change
      */
     nextGeneration() {
-        let nextCells = [...this.cells];
+        this.changed = [];
         for (let i = 0; i < this.width * this.height; i++) {
             const n = this.countNeighbours(i);
-            if (n < 2) {
-                nextCells[i] = 0;
-            } else if ((n === 2 || n === 3) && this.cellState(i) === 1) {
-                nextCells[i] = 1;
+            if (n < 2 && this.cellState(i) === 1) {
+                    this.changed.push({ index: i, status: 0 });
             } else if (n > 3 && this.cellState(i) === 1) {
-                nextCells[i] = 0;
+                this.changed.push({ index: i, status: 0 });
             } else if (n === 4 && this.cellState(i) === 0) {
-                nextCells[i] = 1;
+                this.changed.push({ index: i, status: 1 });
             }
         }
-        this.cells = [...nextCells];
         this.gen++;
     }
 
@@ -232,8 +266,8 @@ class Board {
     run() {
         this.interval = setInterval(() => {
             this.nextGeneration();
-            this.clear();
-            this.draw();
+            this.updateBoard();
+            this.showGen();
         }, this.interv);
     }
 
